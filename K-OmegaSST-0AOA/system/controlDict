@@ -1,0 +1,218 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  5                                     |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     simpleFoam;
+
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         25000;
+
+deltaT          1;
+
+writeControl    timeStep;
+
+writeInterval   100;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression  uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    libs            ("libfieldFunctionObjects.so");
+    
+    Co1
+    {
+        type                CourantNo;
+        libs                ("libfieldFunctionObjects.so");
+        executeControl      writeTime;
+       // executeInterval     2;
+        writeControl        writeTime;
+    }
+
+    Ma
+    {
+        type            MachNo;
+        executeControl  writeTime;
+        writeControl    writeTime;
+    }
+    
+    
+ 
+    forces
+{
+    type forceCoeffs;
+    libs ("libforces.so");
+    patches (aerofoil);
+    p	    p;
+    U       U;
+    rho     rhoInf;
+    log	    true;
+    rhoInf  1.176829;
+    liftDir (0 0 1);
+    dragDir (1 0 0);
+    CofR (0 0 0);
+    pitchAxis (0 -1 0);
+    magUInf 52.05;
+    lRef 1;
+    Aref 1;
+    executeControl               writeTime;
+    writeControl                 writeTime;
+}
+
+residuals
+{
+ type                       residuals;
+ functionObjectLibs         ("libutilityFunctionObjects.so");
+ enabled                     true;
+ executeControl               writeTime;
+ writeControl                 writeTime;
+ 
+ fields
+ (
+   p
+   U
+   k
+   omega
+ );
+}
+ yPlus
+    {
+        type                         yPlus;
+        libs                  ("libfieldFunctionObjects.so");
+        executeControl               writeTime;
+        writeControl                 writeTime;
+    }
+     
+    Forces
+    {
+      
+      type		forces;
+      libs        	("libforces.so");
+     writeFields 	   yes;
+     executeControl        writeTime;
+     writeControl          writeTime;
+      patches     	(aerofoil);
+      log         	 yes;
+      CofR		(0 0 0);
+      rho 		rhoInf;
+      rhoInf		1.176829;
+    }
+    
+    pressureCoeff
+    {
+      type        	pressure;
+      libs        	("libfieldFunctionObjects.so");
+      region             region0;
+      enabled            yes;
+      calcTotal   	yes;
+      calcCoeff   	yes;
+       log	        true;
+     executeControl      writeTime;
+        writeControl     writeTime;
+      rho             	rhoInf;
+      pRef               0;
+      pInf		0;
+      UInf		(52.05 0 0);
+      rhoInf		1.176829;
+    }
+}
+   
+    
+
+
+/*wallShearStress1
+{
+    // Mandatory entries (unmodifiable)
+    type            wallShearStress;
+    libs            ("libfieldFunctionObjects.so");
+    executeControl  writeTime;
+    writeControl    writeTime;
+}
+
+
+
+
+wallHeatFlux
+{
+    
+    type            wallHeatFlux;
+    libs            ("libfieldFunctionObjects.so");
+    executeControl  writeTime;
+    writeControl    writeTime;
+    //patches	    (cylinder) 
+}
+
+enstrophy1
+{
+    // Mandatory entries (unmodifiable)
+    type            enstrophy;
+    libs            ("libfieldFunctionObjects.so");
+    executeControl  writeTime;
+    writeControl    writeTime;
+}
+
+vorticity1
+{
+    // Mandatory entries (unmodifiable)
+    type        vorticity;
+    libs            ("libfieldFunctionObjects.so");
+    executeControl  writeTime;
+    writeControl    writeTime;  
+}
+/*
+heatTransferCoeff1
+{
+    // Mandatory entries (unmodifiable)
+    type        heatTransferCoeff;
+    libs            ("libfieldFunctionObjects.so");
+    executeControl  writeTime;
+    writeControl    writeTime; 
+
+    // Mandatory (inherited) entries (runtime modifiable)
+    field       <field>;
+    patches     (<patch1> <patch2> ... <patchN>);
+    htcModel    <htcModel>;
+
+    // Optional entries (runtime modifable)
+    qr          no;
+    L           1.0;
+    kappa       1.0;
+
+  
+}
+*/
+
+
+
+
+
+// ************************************************************************* //
